@@ -19,12 +19,19 @@ resource "docker_volume" "nodered_volume" {
   name = "nodered"
 }
 
+resource "random_string" "random" {
+  count   = 1
+  length  = 4
+  upper   = false
+  special = false
+}
+
 resource "docker_container" "nodered_container" {
-  name  = "nodered"
+  count = 1
+  name  = join("-", ["nodered", random_string.random[count.index].result])
   image = docker_image.nodered_image.latest
   ports {
     internal = 1880
-    external = 1880
   }
   volumes {
     volume_name    = "nodered"
@@ -33,5 +40,5 @@ resource "docker_container" "nodered_container" {
 }
 
 output "container-host" {
-  value = join(":", [docker_container.nodered_container.ip_address, docker_container.nodered_container.ports[0].external])
+  value = [for i in docker_container.nodered_container[*] : join(":", [i.ip_address, i.ports[0].external])]
 }
