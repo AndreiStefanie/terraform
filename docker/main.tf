@@ -11,11 +11,6 @@ provider "docker" {
   host = "unix:///var/run/docker.sock"
 }
 
-variable "container_count" {
-  type    = number
-  default = 1
-}
-
 resource "docker_image" "nodered" {
   name = "nodered/node-red:latest"
 }
@@ -44,8 +39,4 @@ resource "docker_container" "nodered" {
     volume_name    = "nodered"
     container_path = "/data"
   }
-}
-
-output "container-host" {
-  value = [for i in docker_container.nodered[*] : join(":", [i.ip_address, i.ports[0].external])]
 }
