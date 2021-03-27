@@ -11,25 +11,32 @@ provider "docker" {
   host = "unix:///var/run/docker.sock"
 }
 
-resource "docker_image" "nodered_image" {
+variable "container_count" {
+  type    = number
+  default = 1
+}
+
+resource "docker_image" "nodered" {
   name = "nodered/node-red:latest"
 }
 
-resource "docker_volume" "nodered_volume" {
+resource "docker_volume" "nodered" {
   name = "nodered"
 }
 
 resource "random_string" "random" {
-  count   = 1
+  count = var.container_count
+
   length  = 4
   upper   = false
   special = false
 }
 
-resource "docker_container" "nodered_container" {
-  count = 1
+resource "docker_container" "nodered" {
+  count = var.container_count
+
   name  = join("-", ["nodered", random_string.random[count.index].result])
-  image = docker_image.nodered_image.latest
+  image = docker_image.nodered.latest
   ports {
     internal = 1880
   }
@@ -40,5 +47,5 @@ resource "docker_container" "nodered_container" {
 }
 
 output "container-host" {
-  value = [for i in docker_container.nodered_container[*] : join(":", [i.ip_address, i.ports[0].external])]
+  value = [for i in docker_container.nodered[*] : join(":", [i.ip_address, i.ports[0].external])]
 }
