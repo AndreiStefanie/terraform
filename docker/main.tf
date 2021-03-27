@@ -12,7 +12,7 @@ provider "docker" {
 }
 
 resource "docker_image" "nodered" {
-  name = "nodered/node-red:latest"
+  name = var.image[var.env]
 }
 
 resource "docker_volume" "nodered" {
