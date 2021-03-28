@@ -1,4 +1,4 @@
 
 output "container-host" {
-  value = [for i in docker_container.nodered[*] : join(":", [i.ip_address, i.ports[0].external])]
+  value = [for c in module.container : join(":", [c.this_container.ip_address, c.this_container.ports[0].external])]
 }

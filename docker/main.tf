@@ -11,32 +11,21 @@ provider "docker" {
   host = "unix:///var/run/docker.sock"
 }
 
-resource "docker_image" "nodered" {
-  name = var.image[var.env]
+module "image" {
+  source = "./image"
+  image  = var.image[var.env]
 }
 
 resource "docker_volume" "nodered" {
   name = "nodered"
 }
 
-resource "random_string" "random" {
-  count = var.container_count
+module "container" {
+  count = 2
 
-  length  = 4
-  upper   = false
-  special = false
-}
+  source = "./container"
 
-resource "docker_container" "nodered" {
-  count = var.container_count
-
-  name  = join("-", ["nodered", random_string.random[count.index].result])
-  image = docker_image.nodered.latest
-  ports {
-    internal = 1880
-  }
-  volumes {
-    volume_name    = "nodered"
-    container_path = "/data"
-  }
+  image          = module.image.this_image
+  volume_name    = "nodered"
+  container_path = "/data"
 }
