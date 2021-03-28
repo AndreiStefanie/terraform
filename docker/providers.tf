@@ -5,3 +5,5 @@ terraform {
     }
   }
 }
+
+provider "docker" {}

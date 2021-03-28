@@ -1,9 +1,6 @@
-variable "image" {}
-
-variable "volume_name" {
-  type = string
-}
-
-variable "container_path" {
-  type = string
-}
+variable "ext_port_in" {}
+variable "int_port_in" {}
+variable "volumes_in" {}
+variable "image_in" {}
+variable "name_in" {}
+variable "count_in" {}

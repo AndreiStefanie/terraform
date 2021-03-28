@@ -1,31 +1,17 @@
-terraform {
-  required_providers {
-    docker = {
-      source  = "kreuzwerker/docker"
-      version = "~> 2.11.0"
-    }
-  }
-}
-
-provider "docker" {
-  host = "unix:///var/run/docker.sock"
-}
-
 module "image" {
-  source = "./image"
-  image  = var.image[var.env]
+  source   = "./image"
+  for_each = local.deployment
+  image_in = each.value.image
 }
 
-resource "docker_volume" "nodered" {
-  name = "nodered"
-}
 
 module "container" {
-  count = 2
-
-  source = "./container"
-
-  image          = module.image.this_image
-  volume_name    = "nodered"
-  container_path = "/data"
+  source      = "./container"
+  count_in    = each.value.container_count
+  for_each    = local.deployment
+  name_in     = each.key
+  image_in    = module.image[each.key].image_out
+  int_port_in = each.value.int
+  ext_port_in = each.value.ext
+  volumes_in  = each.value.volumes
 }

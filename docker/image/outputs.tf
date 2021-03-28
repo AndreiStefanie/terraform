@@ -1,3 +1,3 @@
-output "this_image" {
-  value = docker_image.nodered.latest
+output "image_out" {
+  value = docker_image.container_image.latest
 }
