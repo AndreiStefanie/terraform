@@ -1,0 +1,10 @@
+variable "db_storage" {}
+variable "db_engine_version" {}
+variable "db_instance_class" {}
+variable "db_name" {}
+variable "db_user" {}
+variable "db_pass" {}
+variable "db_subnet_group_name" {}
+variable "db_identifier" {}
+variable "skip_db_snapshot" {}
+variable "vpc_security_group_ids" {}
