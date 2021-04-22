@@ -5,16 +5,6 @@ resource "random_integer" "random" {
   max = 100
 }
 
-resource "random_shuffle" "public_azs" {
-  result_count = var.public_sn_count
-  input        = local.azs
-}
-
-resource "random_shuffle" "private_azs" {
-  result_count = var.private_sn_count
-  input        = local.azs
-}
-
 resource "aws_vpc" "tf_vpc" {
   cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
@@ -29,12 +19,12 @@ resource "aws_vpc" "tf_vpc" {
   }
 }
 
-resource "aws_subnet" "tf_public_subnet" {
+resource "aws_subnet" "public" {
   count                   = var.public_sn_count
   vpc_id                  = aws_vpc.tf_vpc.id
   cidr_block              = var.public_cidrs[count.index]
   map_public_ip_on_launch = true
-  availability_zone       = random_shuffle.public_azs.result[count.index]
+  availability_zone       = element(local.azs, count.index)
 
   tags = {
     Name = "tf_public_${count.index + 1}"
@@ -43,15 +33,15 @@ resource "aws_subnet" "tf_public_subnet" {
 
 resource "aws_route_table_association" "tf_public_assoc" {
   count          = var.public_sn_count
-  subnet_id      = aws_subnet.tf_public_subnet[count.index].id
+  subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.tf_public_rt.id
 }
 
-resource "aws_subnet" "tf_private_subnet" {
+resource "aws_subnet" "private" {
   count             = var.private_sn_count
   vpc_id            = aws_vpc.tf_vpc.id
   cidr_block        = var.private_cidrs[count.index]
-  availability_zone = random_shuffle.private_azs.result[count.index]
+  availability_zone = element(local.azs, count.index)
 
   tags = {
     Name = "tf_private_${count.index + 1}"
@@ -88,7 +78,7 @@ resource "aws_default_route_table" "tf_private_rt" {
   }
 }
 
-resource "aws_security_group" "tf_sg" {
+resource "aws_security_group" "this" {
   for_each    = var.security_groups
   name        = each.value.name
   description = each.value.description
@@ -115,7 +105,7 @@ resource "aws_security_group" "tf_sg" {
 resource "aws_db_subnet_group" "tf_rds_sng" {
   count      = var.add_db_sng ? 1 : 0
   name       = "tf_rds_subnetgroup"
-  subnet_ids = aws_subnet.tf_private_subnet[*].id
+  subnet_ids = aws_subnet.private[*].id
 
   tags = {
     Name = "tf_rds_sng"
