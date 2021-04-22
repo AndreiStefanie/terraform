@@ -12,9 +12,11 @@ variable "db_name" {
 }
 
 variable "db_user" {
-  type = string
+  type      = string
+  sensitive = true
 }
 
 variable "db_pass" {
-  type = string
+  type      = string
+  sensitive = true
 }
