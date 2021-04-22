@@ -37,3 +37,12 @@ module "loadbalancer" {
   interval            = 30
   listener_port       = 80
 }
+
+module "compute" {
+  source         = "./compute"
+  instance_count = 1
+  instance_type  = "t3.micro"
+  public_sg      = module.networking.public_sg
+  public_subnets = module.networking.public_subnets
+  volume_size    = 10
+}
