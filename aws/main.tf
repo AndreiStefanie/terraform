@@ -10,19 +10,19 @@ module "networking" {
   add_db_sng       = true
 }
 
-# module "database" {
-#   source                 = "./database"
-#   db_storage             = 10
-#   db_engine_version      = "5.7.22"
-#   db_instance_class      = "db.t2.micro"
-#   db_name                = var.db_name
-#   db_user                = var.db_user
-#   db_pass                = var.db_pass
-#   db_identifier          = "tf-db"
-#   db_subnet_group_name   = module.networking.db_subnet_group_names[0]
-#   vpc_security_group_ids = module.networking.db_security_group_ids
-#   skip_db_snapshot       = true
-# }
+module "database" {
+  source                 = "./database"
+  db_storage             = 10
+  db_engine_version      = "5.7.22"
+  db_instance_class      = "db.t3.micro"
+  db_name                = var.db_name
+  db_user                = var.db_user
+  db_pass                = var.db_pass
+  db_identifier          = "tf-db"
+  db_subnet_group_name   = module.networking.db_subnet_group_names[0]
+  vpc_security_group_ids = module.networking.db_security_group_ids
+  skip_db_snapshot       = true
+}
 
 module "loadbalancer" {
   source              = "./loadbalancer"
@@ -39,10 +39,18 @@ module "loadbalancer" {
 }
 
 module "compute" {
-  source         = "./compute"
-  instance_count = 1
-  instance_type  = "t3.micro"
-  public_sg      = module.networking.public_sg
-  public_subnets = module.networking.public_subnets
-  volume_size    = 10
+  source           = "./compute"
+  instance_count   = 2
+  instance_type    = "t3.micro"
+  public_sg        = module.networking.public_sg
+  public_subnets   = module.networking.public_subnets
+  volume_size      = 10
+  key_name         = "tfkey"
+  public_key_path  = var.public_key_path
+  user_data_path   = "${path.root}/userdata.tpl"
+  db_name          = var.db_name
+  db_user          = var.db_user
+  db_pass          = var.db_pass
+  db_endpoint      = module.database.endpoint
+  target_group_arn = module.loadbalancer.target_group_arn
 }

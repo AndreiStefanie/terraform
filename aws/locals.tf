@@ -24,6 +24,12 @@ locals {
           protocol    = "tcp"
           cidr_blocks = [local.any_ip]
         }
+        nginx = {
+          from        = 8080
+          to          = 8080
+          protocol    = "tcp"
+          cidr_blocks = [local.any_ip]
+        }
       }
     }
 
