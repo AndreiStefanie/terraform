@@ -1,5 +1,5 @@
 variable "aws_region" {
-  default = "eu-north-1"
+  default = "eu-west-1"
 }
 
 variable "access_ip" {
@@ -22,5 +22,9 @@ variable "db_pass" {
 }
 
 variable "public_key_path" {
+  type = string
+}
+
+variable "private_key_path" {
   type = string
 }

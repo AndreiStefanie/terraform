@@ -7,15 +7,19 @@ locals {
 }
 
 locals {
+  app_port = 8080
+}
+
+locals {
   security_groups = {
     public = {
       name        = "public_sg"
       description = "Allow public traffic"
       ingress = {
-        ssh = {
-          from        = 22
-          to          = 22
-          protocol    = "tcp"
+        ctl = {
+          from        = 0
+          to          = 0
+          protocol    = "-1"
           cidr_blocks = [var.access_ip]
         }
         http = {
@@ -25,8 +29,8 @@ locals {
           cidr_blocks = [local.any_ip]
         }
         nginx = {
-          from        = 8080
-          to          = 8080
+          from        = local.app_port
+          to          = local.app_port
           protocol    = "tcp"
           cidr_blocks = [local.any_ip]
         }

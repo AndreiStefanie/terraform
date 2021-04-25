@@ -14,7 +14,7 @@ module "database" {
   source                 = "./database"
   db_storage             = 10
   db_engine_version      = "5.7.22"
-  db_instance_class      = "db.t3.micro"
+  db_instance_class      = "db.t2.micro"
   db_name                = var.db_name
   db_user                = var.db_user
   db_pass                = var.db_pass
@@ -28,7 +28,7 @@ module "loadbalancer" {
   source              = "./loadbalancer"
   public_subnets      = module.networking.public_subnets
   public_sg           = module.networking.public_sg
-  port                = 8080
+  port                = local.app_port
   protocol            = "HTTP"
   vpc_id              = module.networking.vpc_id
   healthy_threshold   = 2
@@ -40,17 +40,19 @@ module "loadbalancer" {
 
 module "compute" {
   source           = "./compute"
-  instance_count   = 2
-  instance_type    = "t3.micro"
+  instance_count   = 1
+  instance_type    = "t2.micro"
   public_sg        = module.networking.public_sg
   public_subnets   = module.networking.public_subnets
   volume_size      = 10
   key_name         = "tfkey"
   public_key_path  = var.public_key_path
-  user_data_path   = "${path.root}/userdata.tpl"
+  private_key_path = var.private_key_path
+  user_data_path   = "${path.root}/scripts/userdata.tpl"
   db_name          = var.db_name
   db_user          = var.db_user
   db_pass          = var.db_pass
   db_endpoint      = module.database.endpoint
   target_group_arn = module.loadbalancer.target_group_arn
+  tg_port          = local.app_port
 }

@@ -47,6 +47,31 @@ resource "aws_instance" "node" {
   tags = {
     Name = "tf-node-${random_id.this[count.index].dec}"
   }
+
+  provisioner "remote-exec" {
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      host        = self.public_ip
+      private_key = file(var.private_key_path)
+    }
+    script = "${path.cwd}/scripts/delay.sh"
+  }
+
+  provisioner "local-exec" {
+    command = templatefile("${path.cwd}/scripts/kube.tpl",
+      {
+        nodeip           = self.public_ip
+        k3s_path         = "${path.cwd}/../"
+        nodename         = self.tags.Name
+        private_key_path = var.private_key_path
+      }
+    )
+  }
+
+  provisioner "local-exec" {
+    command = "rm -f ${path.cwd}/../k3s-${self.tags.Name}.yaml"
+  }
 }
 
 resource "aws_alb_target_group_attachment" "this" {
@@ -54,5 +79,5 @@ resource "aws_alb_target_group_attachment" "this" {
 
   target_group_arn = var.target_group_arn
   target_id        = aws_instance.node[count.index].id
-  port             = 8080
+  port             = var.tg_port
 }

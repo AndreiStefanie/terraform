@@ -26,6 +26,10 @@ variable "public_key_path" {
   type = string
 }
 
+variable "private_key_path" {
+  type = string
+}
+
 variable "user_data_path" {
   type = string
 }
@@ -48,4 +52,8 @@ variable "db_endpoint" {
 
 variable "target_group_arn" {
   type = string
+}
+
+variable "tg_port" {
+  type = number
 }
